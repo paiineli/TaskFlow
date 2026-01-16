@@ -1,0 +1,57 @@
+@if (TempData["Modal-Sucesso"] != null)
+{
+    <script>
+        $(document).ready(function () {
+            var modalSucesso = new bootstrap.Modal(document.getElementById('modalSucesso'));
+            modalSucesso.show();
+            setTimeout(function () { modalSucesso.hide(); }, 4000);
+        });
+    </script>
+    <div class="modal fade" id="modalSucesso" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle"></i> Sucesso
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <p class="mb-0">@Html.Raw(TempData["Modal-Sucesso"])</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (TempData["Modal-Erro"] != null)
+{
+    <script>
+        $(document).ready(function () {
+            var modalErro = new bootstrap.Modal(document.getElementById('modalErro'));
+            modalErro.show();
+            setTimeout(function () { modalErro.hide(); }, 4000);
+        });
+    </script>
+    <div class="modal fade" id="modalErro" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-circle"></i> Erro
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-exclamation-circle text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    <p class="mb-0">@Html.Raw(TempData["Modal-Erro"])</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}

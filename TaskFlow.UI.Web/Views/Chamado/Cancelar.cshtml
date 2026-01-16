@@ -1,0 +1,62 @@
+@model ChamadoViewMOD
+@{
+    ViewData["Title"] = "Cancelar Chamado";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-times-circle"></i> Cancelar Chamado
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Atenção:</strong> Esta ação cancelará o chamado permanentemente.
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Chamado:</strong> @Model.Chamado.NrChamado - @Model.Chamado.TxTitulo
+                    </div>
+
+                    <form asp-action="Cancelar" method="post">
+                        <input type="hidden" name="cdChamado" value="@Model.Chamado.CdChamado" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Motivo do Cancelamento *</label>
+                            <select name="cdJustificativa" class="form-select" required>
+                                <option value="">Selecione um motivo...</option>
+                                @foreach (var just in ViewBag.Justificativas)
+                                {
+                                    <option value="@just.CdJustificativa">@just.TxJustificativa</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Observações Adicionais (opcional)</label>
+                            <textarea name="txJustificativaComplemento" class="form-control" rows="3" placeholder="Explique o motivo do cancelamento..."></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="@Url.Action("Detalhes", "Chamado", new { id = Model.Chamado.CdChamado })" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-times-circle"></i> Confirmar Cancelamento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

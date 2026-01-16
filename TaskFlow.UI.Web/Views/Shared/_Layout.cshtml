@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TaskFlow</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body {
+            padding-top: 70px;
+            padding-bottom: 60px;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center" href="@Url.Action("Index", "Home")">
+                    <i class="fas fa-headset me-2" style="font-size: 1.5rem;"></i>
+                    <span>TaskFlow</span>
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Index", "Home")">
+                                <i class="fas fa-home"></i> Início
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Index", "Chamado")">
+                                <i class="fas fa-ticket-alt"></i> Chamados
+                            </a>
+                        </li>
+                        @if (User.FindFirst("SnTipoUsuario")?.Value != "A")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Novo", "Chamado")">
+                                    <i class="fas fa-plus-circle"></i> Novo Chamado
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    
+                    <div class="d-flex align-items-center">
+                        <span class="text-white me-3 d-none d-md-inline">
+                            <i class="fas fa-user-circle"></i>
+                            @User.FindFirst("NmFuncionario")?.Value
+                        </span>
+                        <a href="@Url.Action("Sair", "Login")" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        @RenderBody()
+        <partial name="_PartialMensagem" />
+    </main>
+
+    <footer class="bg-light text-center py-3 mt-5 border-top">
+        <div class="container">
+            <small class="text-muted">
+                &copy; @DateTime.Now.Year TaskFlow - Todos os direitos reservados
+            </small>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

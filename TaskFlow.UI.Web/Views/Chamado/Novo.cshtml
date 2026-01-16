@@ -1,0 +1,81 @@
+@model ChamadoViewMOD
+@{
+    ViewData["Title"] = "Novo Chamado";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus-circle"></i> Abrir Novo Chamado
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Novo" asp-controller="Chamado" method="post">
+                        <div class="mb-3">
+                            <label asp-for="Chamado.TxTitulo" class="form-label">Título *</label>
+                            <input asp-for="Chamado.TxTitulo" class="form-control" placeholder="Resumo do problema..." maxlength="200" required />
+                            <span asp-validation-for="Chamado.TxTitulo" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Chamado.CdCategoria" class="form-label">Categoria *</label>
+                            <select asp-for="Chamado.CdCategoria" class="form-select" required>
+                                <option value="">Selecione uma categoria</option>
+                                @foreach (var cat in ViewBag.Categorias)
+                                {
+                                    <option value="@cat.CdCategoria">@cat.NmCategoria</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Chamado.CdCategoria" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Chamado.CdPrioridade" class="form-label">Prioridade *</label>
+                            <select asp-for="Chamado.CdPrioridade" class="form-select" required>
+                                <option value="1">Baixa</option>
+                                <option value="2" selected>Normal</option>
+                                <option value="3">Alta</option>
+                                <option value="4">Urgente</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> 
+                                Selecione Urgente apenas para problemas críticos que impedem o trabalho.
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Chamado.TxDescricao" class="form-label">Descrição Detalhada *</label>
+                            <textarea asp-for="Chamado.TxDescricao" class="form-control" rows="6" placeholder="Descreva o problema com detalhes..." required></textarea>
+                            <span asp-validation-for="Chamado.TxDescricao" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> 
+                                Forneça o máximo de detalhes possível: o que aconteceu, quando, onde, mensagens de erro, etc.
+                            </small>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-lightbulb"></i> <strong>Dica:</strong> Após abrir o chamado, você poderá anexar arquivos (prints, logs, documentos) na tela de detalhes.
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Abrir Chamado
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

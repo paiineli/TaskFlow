@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Armazenamento de Dados/">
+    <Project Path="TaskFlow.Model/TaskFlow.Model.csproj" />
+  </Folder>
+  <Folder Name="/Banco/">
+    <Project Path="TaskFlow.Data/TaskFlow.Data.csproj" />
+    <Project Path="TaskFlow.Repository/TaskFlow.Repository.csproj" />
+  </Folder>
+  <Folder Name="/Telas/">
+    <Project Path="TaskFlow.IOC/TaskFlow.IOC.csproj" />
+    <Project Path="TaskFlow.UI.Web/TaskFlow.UI.Web.csproj" />
+  </Folder>
+</Solution>

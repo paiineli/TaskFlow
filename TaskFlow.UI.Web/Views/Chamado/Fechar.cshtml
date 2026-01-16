@@ -1,0 +1,60 @@
+@model ChamadoViewMOD
+@{
+    ViewData["Title"] = "Fechar Chamado";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-flag-checkered"></i> Fechar Chamado
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Chamado:</strong> @Model.Chamado.NrChamado - @Model.Chamado.TxTitulo
+                    </div>
+
+                    <p>Confirme o fechamento do chamado. Opcionalmente, adicione uma justificativa:</p>
+
+                    <form asp-action="Fechar" method="post">
+                        <input type="hidden" name="cdChamado" value="@Model.Chamado.CdChamado" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Justificativa (opcional)</label>
+                            <select name="cdJustificativa" class="form-select">
+                                <option value="">Nenhuma</option>
+                                @foreach (var just in ViewBag.Justificativas)
+                                {
+                                    <option value="@just.CdJustificativa">@just.TxJustificativa</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Observações Adicionais (opcional)</label>
+                            <textarea name="txJustificativaComplemento" class="form-control" rows="3" placeholder="Adicione observações se necessário..."></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="@Url.Action("Detalhes", "Chamado", new { id = Model.Chamado.CdChamado })" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Confirmar Fechamento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

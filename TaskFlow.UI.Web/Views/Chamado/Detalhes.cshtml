@@ -1,0 +1,404 @@
+@using TaskFlow.UI.Web.Helpers
+@model ChamadoViewMOD
+@{
+    ViewData["Title"] = $"Chamado {Model.Chamado.NrChamado}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var tipoUsuario = ViewBag.TipoUsuario;
+    var cdFuncionario = ViewBag.CdFuncionario;
+    var ehSolicitante = Model.Chamado.CdSolicitante == cdFuncionario;
+    var ehResponsavel = Model.Chamado.CdResponsavel == cdFuncionario;
+    var ehAtendente = tipoUsuario == "U" || tipoUsuario == "A";
+    var podeAtribuir = ehAtendente && Model.Chamado.CdResponsavel == null && Model.Chamado.CdStatus != 6 && Model.Chamado.CdStatus != 7;
+    var podeTransferir = ehAtendente && ehResponsavel && Model.Chamado.CdStatus != 6 && Model.Chamado.CdStatus != 7;
+    var podeResolver = ehResponsavel && Model.Chamado.CdStatus == 3;
+    var podeFinalizar = ehSolicitante && Model.Chamado.CdStatus == 5;
+    var podeCancelar = (ehSolicitante || ehAtendente) && Model.Chamado.CdStatus != 6 && Model.Chamado.CdStatus != 7;
+    var podeAvaliar = ehSolicitante && Model.Chamado.CdStatus == 6 && Model.Avaliacao == null;
+}
+
+<div class="container py-4">
+    <!-- Cabeçalho do Chamado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-2">
+                                @Html.Raw(Model.Chamado.CdPrioridade.IconePrioridade())
+                                <h4 class="mb-0 ms-2">@Model.Chamado.NrChamado</h4>
+                                <span class="ms-3">@Html.Raw(Model.Chamado.CdStatus.BadgeStatusChamado())</span>
+                                <span class="ms-2">@Html.Raw(Model.Chamado.CdPrioridade.BadgePrioridade())</span>
+                            </div>
+                            <h5 class="mb-3">@Model.Chamado.TxTitulo</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-folder"></i> <strong>Categoria:</strong> @Model.Chamado.NmCategoria
+                                    </small>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user"></i> <strong>Solicitante:</strong> @Model.Chamado.NmSolicitante
+                                    </small>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user-tie"></i> <strong>Responsável:</strong> @Model.Chamado.NmResponsavel.MostrarOuNaoInformado()
+                                    </small>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> <strong>Aberto:</strong> @Model.Chamado.DtAbertura.MostrarDataOuNaoInformado(true) (@Model.Chamado.DtAbertura.TempoDecorrido())
+                                    </small>
+                                </div>
+                                @if (Model.Chamado.DtResolucao != null)
+                                {
+                                    <div class="col-md-6 mb-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-check"></i> <strong>Resolvido em:</strong> @Model.Chamado.DtResolucao.MostrarDataOuNaoInformado(true)
+                                        </small>
+                                    </div>
+                                }
+                                @if (Model.Chamado.DtFechamento != null)
+                                {
+                                    <div class="col-md-6 mb-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-flag-checkered"></i> <strong>Fechado em:</strong> @Model.Chamado.DtFechamento.MostrarDataOuNaoInformado(true)
+                                        </small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <a href="@Url.Action("Index", "Chamado")" class="btn btn-secondary btn-sm mb-2">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    @if (podeAtribuir || podeTransferir || podeResolver || podeFinalizar || podeCancelar)
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-bolt"></i> Ações Rápidas</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            @if (podeAtribuir)
+                            {
+                                <form method="post" asp-action="Atribuir" asp-route-cdChamado="@Model.Chamado.CdChamado" class="d-inline">
+                                    <button type="submit" class="btn btn-primary" onclick="return confirm('Deseja atribuir este chamado para você?')">
+                                        <i class="fas fa-user-check"></i> Atribuir para Mim
+                                    </button>
+                                </form>
+                            }
+                            @if (podeTransferir)
+                            {
+                                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalTransferir">
+                                    <i class="fas fa-exchange-alt"></i> Transferir
+                                </button>
+                            }
+                            @if (podeResolver)
+                            {
+                                <form method="post" asp-action="Resolver" asp-route-cdChamado="@Model.Chamado.CdChamado" class="d-inline">
+                                    <button type="submit" class="btn btn-success" onclick="return confirm('Marcar este chamado como resolvido?')">
+                                        <i class="fas fa-check-circle"></i> Marcar como Resolvido
+                                    </button>
+                                </form>
+                            }
+                            @if (podeFinalizar)
+                            {
+                                <a href="@Url.Action("Fechar", "Chamado", new { id = Model.Chamado.CdChamado })" class="btn btn-success">
+                                    <i class="fas fa-flag-checkered"></i> Finalizar Chamado
+                                </a>
+                            }
+                            @if (podeCancelar)
+                            {
+                                <a href="@Url.Action("Cancelar", "Chamado", new { id = Model.Chamado.CdChamado })" class="btn btn-danger">
+                                    <i class="fas fa-times-circle"></i> Cancelar Chamado
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Coluna Principal -->
+        <div class="col-md-8">
+            <!-- Descrição -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-file-alt"></i> Descrição do Problema</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0" style="white-space: pre-wrap;">@Model.Chamado.TxDescricao</p>
+                </div>
+            </div>
+
+            <!-- Comentários -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-comments"></i> Comentários 
+                        <span class="badge bg-primary">@Model.Comentarios?.Count ?? 0</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Comentarios != null && Model.Comentarios.Any())
+                    {
+                        @foreach (var comentario in Model.Comentarios.OrderBy(c => c.DtCadastro))
+                        {
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <strong>@comentario.NmFuncionario</strong>
+                                        @if (comentario.SnVisibilidadeInterna == "S")
+                                        {
+                                            <span class="badge bg-warning text-dark ms-2">
+                                                <i class="fas fa-lock"></i> Interno
+                                            </span>
+                                        }
+                                    </div>
+                                    <small class="text-muted">@comentario.DtCadastro.TempoDecorrido()</small>
+                                </div>
+                                <p class="mb-0" style="white-space: pre-wrap;">@comentario.TxComentario</p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">Nenhum comentário ainda.</p>
+                    }
+
+                    <!-- Form Adicionar Comentário -->
+                    @if (Model.Chamado.CdStatus != 6 && Model.Chamado.CdStatus != 7)
+                    {
+                        <div class="mt-4 pt-3 border-top">
+                            <h6 class="mb-3">Adicionar Comentário</h6>
+                            <form method="post" asp-action="AdicionarComentario">
+                                <input type="hidden" name="CdChamado" value="@Model.Chamado.CdChamado" />
+                                <div class="mb-3">
+                                    <textarea name="TxComentario" class="form-control" rows="3" placeholder="Digite seu comentário..." required></textarea>
+                                </div>
+                                @if (ehAtendente)
+                                {
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" name="SnVisibilidadeInterna" id="chkInterno" value="true">
+                                        <label class="form-check-label" for="chkInterno">
+                                            <i class="fas fa-lock"></i> Comentário interno (visível apenas para atendentes)
+                                        </label>
+                                    </div>
+                                }
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-paper-plane"></i> Enviar Comentário
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Avaliação -->
+            @if (podeAvaliar)
+            {
+                <div class="card shadow-sm mb-4 border-success">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="fas fa-star"></i> Avaliar Atendimento</h6>
+                    </div>
+                    <div class="card-body">
+                        <p>O chamado foi resolvido? Avalie o atendimento:</p>
+                        <form method="post" asp-action="Avaliar">
+                            <input type="hidden" name="CdChamado" value="@Model.Chamado.CdChamado" />
+                            <div class="mb-3">
+                                <label class="form-label">Nota *</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="NrNota" id="nota1" value="1" required>
+                                    <label class="btn btn-outline-warning" for="nota1">
+                                        <i class="fas fa-star"></i> 1
+                                    </label>
+                                    <input type="radio" class="btn-check" name="NrNota" id="nota2" value="2">
+                                    <label class="btn btn-outline-warning" for="nota2">
+                                        <i class="fas fa-star"></i> 2
+                                    </label>
+                                    <input type="radio" class="btn-check" name="NrNota" id="nota3" value="3">
+                                    <label class="btn btn-outline-warning" for="nota3">
+                                        <i class="fas fa-star"></i> 3
+                                    </label>
+                                    <input type="radio" class="btn-check" name="NrNota" id="nota4" value="4">
+                                    <label class="btn btn-outline-warning" for="nota4">
+                                        <i class="fas fa-star"></i> 4
+                                    </label>
+                                    <input type="radio" class="btn-check" name="NrNota" id="nota5" value="5">
+                                    <label class="btn btn-outline-warning" for="nota5">
+                                        <i class="fas fa-star"></i> 5
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Comentário (opcional)</label>
+                                <textarea name="TxComentario" class="form-control" rows="3" placeholder="Deixe sua opinião sobre o atendimento..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-paper-plane"></i> Enviar Avaliação
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else if (Model.Avaliacao != null)
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-star"></i> Avaliação</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            @Html.Raw(Model.Avaliacao.NrNota.EstrelasAvaliacao())
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(Model.Avaliacao.TxComentario))
+                        {
+                            <p class="mb-0"><em>"@Model.Avaliacao.TxComentario"</em></p>
+                        }
+                        <small class="text-muted">
+                            Avaliado em @Model.Avaliacao.DtCadastro.MostrarDataOuNaoInformado(true)
+                        </small>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Coluna Lateral -->
+        <div class="col-md-4">
+            <!-- Histórico -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-history"></i> Histórico</h6>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    @if (Model.Historico != null && Model.Historico.Any())
+                    {
+                        <div class="timeline">
+                            @foreach (var hist in Model.Historico)
+                            {
+                                <div class="mb-3 pb-3 border-bottom">
+                                    <small class="text-muted d-block">@hist.DtCadastro.MostrarDataOuNaoInformado(true)</small>
+                                    <strong>@hist.NmFuncionario</strong>
+                                    <p class="mb-0">
+                                        <span class="badge bg-info">@hist.TxAcao</span>
+                                        @if (!string.IsNullOrWhiteSpace(hist.TxValorAnterior) && !string.IsNullOrWhiteSpace(hist.TxValorNovo))
+                                        {
+                                            <br />
+                                            <small>@hist.TxValorAnterior → @hist.TxValorNovo</small>
+                                        }
+                                        else if (!string.IsNullOrWhiteSpace(hist.TxValorNovo))
+                                        {
+                                            <br />
+                                            <small>@hist.TxValorNovo</small>
+                                        }
+                                    </p>
+                                    @if (!string.IsNullOrWhiteSpace(hist.TxObservacao))
+                                    {
+                                        <small class="text-muted">@hist.TxObservacao</small>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">Nenhum histórico ainda.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Anexos -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-paperclip"></i> Anexos
+                        <span class="badge bg-primary">@Model.Anexos?.Count ?? 0</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Anexos != null && Model.Anexos.Any())
+                    {
+                        <ul class="list-unstyled mb-0">
+                            @foreach (var anexo in Model.Anexos)
+                            {
+                                <li class="mb-2">
+                                    @Html.Raw(anexo.NmArquivo.IconeArquivo())
+                                    <a href="#">@anexo.NmArquivo</a>
+                                    <br />
+                                    <small class="text-muted">
+                                        @anexo.NrTamanhoBytes.FormatarTamanhoArquivo() • 
+                                        @anexo.DtCadastro.TempoDecorrido()
+                                    </small>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">Nenhum anexo.</p>
+                    }
+                    
+                    @* TODO: Implementar upload de arquivos *@
+                    @if (Model.Chamado.CdStatus != 6 && Model.Chamado.CdStatus != 7)
+                    {
+                        <div class="mt-3 pt-3 border-top">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i> Upload de arquivos será implementado em breve.
+                            </small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Transferir -->
+@if (podeTransferir)
+{
+    <div class="modal fade" id="modalTransferir" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" asp-action="Transferir">
+                    <input type="hidden" name="cdChamado" value="@Model.Chamado.CdChamado" />
+                    <div class="modal-header">
+                        <h5 class="modal-title">Transferir Chamado</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Novo Responsável *</label>
+                            <select name="cdNovoResponsavel" class="form-select" required>
+                                <option value="">Selecione...</option>
+                                @foreach (var atendente in Model.Atendentes.Where(a => a.CdFuncionario != Model.Chamado.CdResponsavel))
+                                {
+                                    <option value="@atendente.CdFuncionario">@atendente.NmFuncionario</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Transferir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
